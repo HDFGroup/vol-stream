@@ -48,14 +48,19 @@ Ranked by differentiation × how much HDF5 already has.
 
 ### 1. Reader-driven subscription — new protocol
 
-ADIOS2 streaming is push. Writers marshal everything, ship it, and readers select
-what they want and discard the rest — often the overwhelming majority.
+An ADIOS2 SST writer marshals everything it puts in a step and queues it until
+readers pull the parts their selections need. SST thereby avoids delivering all
+data to every reader, but the writer learns what is wanted only after it has
+prepared everything, and a reader cannot change the representation it gets.
 `StepDistributionMode=OnDemand` chooses *which* reader gets a step; it cannot
-change what the step contains.
+change what the step contains. (For a plain box selection SST's bytes on the
+wire are comparable to a subscription's; the wire-byte gain is over streams that
+deliver whole frames. Corrected 2026-10-08: an earlier version said SST ships
+everything and readers discard the rest.)
 
 Let readers declare interest and have writers marshal only what someone
-subscribed to. This cuts serialization CPU and wire bytes at once, and makes
-per-subscriber precision natural: full fidelity to the checkpoint sink,
+subscribed to. This cuts the writer's serialization work (and, against
+whole-frame streams, wire bytes), and makes per-subscriber precision natural: full fidelity to the checkpoint sink,
 downsampled to the live viz, from one `end_step()`.
 
 ### 2. Stream and archive as one object — onion VFD precedent
