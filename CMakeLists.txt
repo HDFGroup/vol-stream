@@ -558,6 +558,22 @@ if(NOT VOL_STREAM_H5VL_VERSION_OK)
     "when H5VL_VERSION moved. See docs/dev-plan.md, CI matrix.")
 endif()
 
+# Whether this HDF5 is a parallel build. Finding MPI is not enough to build the
+# parallel tests: a serial HDF5 on a machine that also has MPI on its PATH has
+# no H5Pset_fapl_mpio(), and t_parallel then fails to compile.
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+check_c_source_compiles("
+#include \"hdf5.h\"
+#ifndef H5_HAVE_PARALLEL
+#error \"serial HDF5\"
+#endif
+int probe(void) { return 0; }
+" VOL_STREAM_HDF5_IS_PARALLEL)
+unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
+if(MPI_C_FOUND AND NOT VOL_STREAM_HDF5_IS_PARALLEL)
+  message(STATUS "MPI found but HDF5 is serial: the parallel tests are skipped")
+endif()
+
 # ---------------------------------------------------------------------------
 # VFD SWMR (optional, examples only)
 #

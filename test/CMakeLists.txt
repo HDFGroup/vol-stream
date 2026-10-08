@@ -337,8 +337,8 @@ endif()
 # M6 exit gate (first increment): collective step boundaries and a
 # parallel writer/reader over MPI, coprime rank counts. Needs MPI (the
 # same MPI_C_FOUND ../CMakeLists.txt already links vol_stream against when
-# present) and mpiexec/mpirun.
-if(MPI_C_FOUND AND MPIEXEC_EXECUTABLE)
+# present), a parallel HDF5, and mpiexec/mpirun.
+if(MPI_C_FOUND AND VOL_STREAM_HDF5_IS_PARALLEL AND MPIEXEC_EXECUTABLE)
   add_executable(t_parallel t_parallel.c)
   target_link_libraries(t_parallel PRIVATE vol_stream)
   add_test(NAME parallel
