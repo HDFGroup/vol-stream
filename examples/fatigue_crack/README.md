@@ -112,10 +112,12 @@ The writer pushed 2,928.9 MiB in all (`VOL_STREAM_PUSH_STATS=1`), against
 offline with the same zlib level, and the band's is the rest. Lossless: the
 monitor's damage numbers were identical. Noisy raw counts compress only about
 1.4x, and compressing added 46 s to that checkpoint's `H5Fend_step()` (183 s
-against 137 s). The deflated run's writer also logged Mercury teardown errors
-at close ("HG core handles must be freed before destroying context"), with
-every exit code 0 and the data correct; the uncompressed run did not. One run
-each, so whether compression causes it is not established.
+against 137 s). That run's writer also logged Mercury teardown errors at close
+("HG core handles must be freed before destroying context"), with every exit
+code 0 and the data correct. It did not recur in five repeats of the same
+checkpoint (three deflated, two not), so it is intermittent: 1 of 4 deflated
+runs, 0 of 3 uncompressed, and the one run that showed it also had
+`VOL_STREAM_PUSH_STATS=1` set. The trigger is not established.
 
 ## Honest notes
 
