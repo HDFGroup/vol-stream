@@ -6,6 +6,7 @@ if(VOL_STREAM_HAVE_MERCURY)
   add_subdirectory(reaction_diffusion)
   add_subdirectory(narrowing_demo)
   add_subdirectory(detector_pipeline)
+  add_subdirectory(fatigue_crack)
 endif()
 
 # The VFD SWMR proof of concept is the opposite case: it needs NO transport
