@@ -478,8 +478,8 @@ supported, or depends on something outside this binding.
   §2.3). A Python subscriber still receives the attribute, and reads through
   the connector are correct; only a native view of the file sees the group.
 - **mochi-flock 0.8.0** crashes when several readers join at once
-  (mochi-hpc/mochi-flock#8). A Python consumer is exposed like any other
-  reader. CI builds Flock `main` plus a local patch.
+  (mochi-hpc/mochi-flock#8, fixed on Flock's `main`, not yet released). A
+  Python consumer is exposed like any other reader. CI builds Flock `main`.
 
 ### Performance
 

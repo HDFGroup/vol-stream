@@ -1184,8 +1184,8 @@ matches the code. Each item is documented for users in
   `vs_tr_*` seam. CI found two Flock bugs under concurrent joins: a group-file
   race fixed on Flock's `main` (7b484c5) but unreleased, and a crash when a
   joiner's provider receives gossip before `init_group()` returns
-  (mochi-hpc/mochi-flock#8, fix proposed as #9). CI builds Flock `main` with
-  that fix applied from `.github/patches/`, and the Flock 0.8.0 release is a
+  (mochi-hpc/mochi-flock#8, fixed on `main` by #9). Neither fix is in a
+  release yet; CI builds Flock `main`, and the Flock 0.8.0 release is a
   documented known limitation.
 - **A Python subscriber**, `volstream`, milestones P0–P5 in
   [`python-plan.md`](python-plan.md): a CPython extension over the C API,
@@ -1531,8 +1531,8 @@ the one list. ★ marks what is being worked on next.
 
 **CI and upstream**
 
-- Flock is built from `main` with a patch until mochi-flock#9, or an
-  equivalent fix, is released.
+- Flock is built from `main` until a release includes mochi-flock#9 (merged
+  2026-09-30) and the group-file fix (7b484c5); then pin to that release.
 - The `ofi+tcp` pass does not gate.
 - The diaspora backend is not built in CI, so changes to it are unverified.
 - CI is Linux only; `volstream.torch` is tested only where torch is installed.

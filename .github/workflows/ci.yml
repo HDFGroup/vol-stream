@@ -304,20 +304,17 @@ jobs:
         # race: "Could not rename ... .swp" errors, torn group files, and a
         # SIGSEGV in libflock-server that failed push_fanout_benchmark and
         # detector_narrowing_benchmark here (see issue #1). Fixed on main in
-        # 7b484c5 but not yet released. Unpinned, so an upstream change can
-        # break this job without a vol-stream commit -- the step logs the
-        # commit it built.
-        #
-        # main still has a second concurrent-join crash: a joiner's provider
-        # dereferences provider->group before init_group() has set it, when
-        # another joiner's gossip arrives mid-join. Patched locally until
-        # upstream fixes it; see the patch file's header. `git apply` fails
-        # the step if upstream changes provider.c under it, which is the
-        # signal to re-check whether the patch is still needed.
+        # 7b484c5 but not yet released. A second concurrent-join crash -- a
+        # joiner's provider dereferencing provider->group before init_group()
+        # had set it, when another joiner's gossip arrived mid-join
+        # (mochi-hpc/mochi-flock#8) -- is fixed on main by #9 (e5921f6,
+        # 8a51382), also unreleased; CI carried it as a local patch until
+        # then. Pin to the first release that includes both once one ships.
+        # Unpinned, so an upstream change can break this job without a
+        # vol-stream commit -- the step logs the commit it built.
         run: |
           git clone --depth 1 --branch main https://github.com/mochi-hpc/mochi-flock.git mochi-flock-src
           git -C mochi-flock-src log -1 --format='mochi-flock main at %H (%cs)'
-          git -C mochi-flock-src apply "$GITHUB_WORKSPACE/.github/patches/flock-provider-group-before-init.patch"
           PKG_CONFIG_PATH=$HOME/mochi-install/lib/pkgconfig:$HOME/mochi-install/lib64/pkgconfig:$PKG_CONFIG_PATH \
             cmake -S mochi-flock-src -B flock-build -G Ninja \
               -DCMAKE_INSTALL_PREFIX=$HOME/mochi-install \

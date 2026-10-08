@@ -402,12 +402,12 @@ Stated plainly so you can plan around them:
 - **The mochi-flock 0.8.0 release crashes when several subscribers join at
   once.** A joining reader can segfault in `libflock-server`: its provider
   dereferences its group before `init_group()` has set it, when another
-  joiner's gossip arrives mid-join (mochi-hpc/mochi-flock#8, fix proposed in
-  #9). 0.8.0 also writes the group file through one shared temp name, so
-  concurrent joins can leave it half-written; that is fixed on Flock's `main`
-  but not released. CI builds Flock `main` with the patch in
-  `.github/patches/`. Building against the 0.8.0 release, expect occasional
-  crashes whenever several readers attach within the same moment.
+  joiner's gossip arrives mid-join (mochi-hpc/mochi-flock#8). 0.8.0 also
+  writes the group file through one shared temp name, so concurrent joins can
+  leave it half-written. Both are fixed on Flock's `main` (#9 and 7b484c5) but
+  not yet released, so CI builds Flock `main`. Building against the 0.8.0
+  release, expect occasional crashes whenever several readers attach within
+  the same moment.
 - **End of stream is not detected for a narrow case:** a reader that joined
   before the writer's first commit, never called `H5Fsubscribe()`,
   `H5Fget_stream_schema()` or `H5Fack_stream_step()`, and saw no step announced
@@ -516,8 +516,8 @@ not get any live channel.
 
 Versions the CI builds against, if you are assembling the stack by hand:
 argobots 1.2, mercury 2.4.1, mochi-margo 0.24.2, mochi-thallium 0.17.1,
-mochi-flock `main` plus `.github/patches/flock-provider-group-before-init.patch`
-(see §2.3 for why not the 0.8.0 release), PMDK 2.1.1, mochi-abt-io 0.9.0,
+mochi-flock `main` (see §2.3 for why not the 0.8.0
+release), PMDK 2.1.1, mochi-abt-io 0.9.0,
 mochi-bake 0.6.4. vol-stream's own CMake requires margo >= 0.24.2 and
 flock >= 0.8.0.
 
