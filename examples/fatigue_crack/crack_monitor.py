@@ -155,9 +155,11 @@ def subscribe(f, args):
         box = {DATA: ((k, 0, 0), (1, h, w)),
                DARK: ((0, 0, 0), (1, h, w)),
                WHITE: ((0, 0, 0), (1, h, w))}
-    box[THETA] = None
-    box[CYCLE] = None
-    f.subscribe(box, expect=expectations(args))
+    # Only the image stacks are worth compressing in transit; the angles and
+    # the cycle count are small, and a scalar cannot be deflated at all.
+    images = {p: box[p] for p in (DATA, DARK, WHITE)}
+    f.subscribe(images, deflate=args.deflate, expect=expectations(args))
+    f.subscribe({THETA: None, CYCLE: None}, expect=expectations(args))
 
 
 def transmission(data, dark, white):
@@ -252,6 +254,8 @@ def main():
     p.add_argument("--projection", type=int, default=0, help="preview mode: which projection (default 0)")
     p.add_argument("--shape", default="1500,2160,2560", help="projections,rows,cols of /exchange/data (default TomoBank's)")
     p.add_argument("--flats", type=int, default=10, help="dark/white frames per scan (default 10)")
+    p.add_argument("--deflate", type=int, default=None,
+                   help="have the writer deflate this subscriber's images in transit (level 0-9; default none)")
     p.add_argument("--out", default=None, help="directory for PNGs and the summary CSV")
     p.add_argument("--timeout", type=float, default=3600.0, help="seconds to wait for the writer (default 3600)")
     p.add_argument("--expect-steps", type=int, default=0, help="fail unless exactly N checkpoints arrive")
@@ -269,7 +273,7 @@ def main():
     subscribe(f, args)
     sel = (f"rows {args.rows[0]}:{args.rows[1]} of every projection" if args.mode == "crack"
            else f"projection {args.projection} plus one dark and one white frame")
-    print(f"{tag}: subscribed to {sel}", flush=True)
+    print(f"{tag}: subscribed to {sel}" + (f", deflated at level {args.deflate} in transit" if args.deflate is not None else ""), flush=True)
 
     history, got, received_total = [], 0, 0
     try:

@@ -96,6 +96,27 @@ capturing it, and 137 s in `H5Fend_step()` writing 15.7 GiB to the disk;
 captured writes are held until `H5Fend_step()`. Reconstructing 8 slices took
 the monitor 38 s per checkpoint, well inside the writer's cadence.
 
+### Compression in transit, per subscriber
+
+`crack_monitor.py --deflate N` has the writer deflate that subscriber's
+images in transit (the run script passes `CRACK_DEFLATE` / `PREVIEW_DEFLATE`).
+On the 750-cycle checkpoint, both at level 1:
+
+| Consumer | Uncompressed | Deflated |
+|---|---|---|
+| crack monitor | 4,156.2 MiB | 2,908.5 MiB |
+| preview | 31.6 MiB | 20.4 MiB |
+
+The writer pushed 2,928.9 MiB in all (`VOL_STREAM_PUSH_STATS=1`), against
+4,187.8 MiB uncompressed; the preview's share is its three frames deflated
+offline with the same zlib level, and the band's is the rest. Lossless: the
+monitor's damage numbers were identical. Noisy raw counts compress only about
+1.4x, and compressing added 46 s to that checkpoint's `H5Fend_step()` (183 s
+against 137 s). The deflated run's writer also logged Mercury teardown errors
+at close ("HG core handles must be freed before destroying context"), with
+every exit code 0 and the data correct; the uncompressed run did not. One run
+each, so whether compression causes it is not established.
+
 ## Honest notes
 
 - **The metric is a screen, not a fracture measurement.** "Damaged fraction"

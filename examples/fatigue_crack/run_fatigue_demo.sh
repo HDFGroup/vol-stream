@@ -7,11 +7,12 @@
 #   DATA_DIR holds tomo_000NN.h5 and cycles.csv; SCANs default to every
 #   tomo_*.h5 there, in name order. OUT_DIR (default DATA_DIR/run) receives
 #   the stream file, logs, PNGs and damage.csv.
-# Environment: PYTHON (default python3), ROWS (crack band, default 400:960).
+# Environment: PYTHON (default python3), ROWS (crack band, default 400:960),
+#   CRACK_DEFLATE / PREVIEW_DEFLATE (deflate that subscriber's images in transit).
 set -u
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-[ $# -ge 2 ] || { sed -n '2,12p' "$0"; exit 2; }
+[ $# -ge 2 ] || { sed -n '2,11p' "$0"; exit 2; }
 BUILD_DIR="$(cd "$1" && pwd)" || exit 1
 DATA_DIR="$(cd "$2" && pwd)" || exit 1
 OUT_DIR="${3:-$DATA_DIR/run}"
@@ -50,10 +51,10 @@ trap 'kill $WPID $CPID $PPID_ 2>/dev/null; wait 2>/dev/null' INT TERM
 for _ in $(seq 300); do [ -e "$STREAM.vsgroup" ] && break; sleep 0.1; done
 
 "$PYTHON" "$SCRIPT_DIR/crack_monitor.py" "$STREAM" --mode crack --rows "${ROWS:-400:960}" \
-    --out "$OUT_DIR" --expect-steps "${#SCANS[@]}" > crack.log 2>&1 &
+    --out "$OUT_DIR" --expect-steps "${#SCANS[@]}" ${CRACK_DEFLATE:+--deflate "$CRACK_DEFLATE"} > crack.log 2>&1 &
 CPID=$!
 "$PYTHON" "$SCRIPT_DIR/crack_monitor.py" "$STREAM" --mode preview \
-    --out "$OUT_DIR" --expect-steps "${#SCANS[@]}" > preview.log 2>&1 &
+    --out "$OUT_DIR" --expect-steps "${#SCANS[@]}" ${PREVIEW_DEFLATE:+--deflate "$PREVIEW_DEFLATE"} > preview.log 2>&1 &
 PPID_=$!
 
 # The subscribers close first, while the writer's group is still alive.
